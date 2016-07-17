@@ -2,26 +2,39 @@ class Player {
   constructor() {
       this.maxLife = 20;
       this.pastHealth = this.maxLife;
+      this.backWallHitted = false;
   }
 
-  playTurn(warrior) {
-    let clearAhead = warrior.feel().isEmpty;
-    let isCaptive = warrior.feel().isCaptive;
+  strategy(direction, warrior){
+    let space = warrior.feel(direction);
+    let health = warrior.health();
 
-    if (clearAhead()) {
-      if(warrior.health() < this.maxLife && warrior.health() >= this.pastHealth){
+    if (direction === 'backward' && space.isWall()) {
+      this.backWallHitted = true;
+      warrior.walk();
+      return;
+    }
+
+    if (space.isEmpty()) {
+      if (health <= this.maxLife/2 && this.pastHealth > health) {
+        warrior.walk('backward');
+      } else if(health < this.maxLife && health >= this.pastHealth){
         warrior.rest();
       } else {
-        warrior.walk();
+        warrior.walk(direction);
       }
     } else {
-      if(isCaptive()){
-          warrior.rescue();
+      if(space.isCaptive()){
+          warrior.rescue(direction);
       } else {
-        warrior.attack();
+        warrior.attack(direction);
       }
     }
-    this.pastHealth = warrior.health();
+    this.pastHealth = health;
+  }
+  playTurn(warrior) {
+    let direction = this.backWallHitted ? 'forward' : 'backward';
+    this.strategy(direction, warrior);
   }
 
 }
