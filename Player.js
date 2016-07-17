@@ -33,8 +33,13 @@ class Player {
     this.pastHealth = health;
   }
   playTurn(warrior) {
-    let direction = this.backWallHitted ? 'forward' : 'backward';
-    this.strategy(direction, warrior);
+    let space = warrior.feel();
+    if (space.isWall()) {
+      warrior.pivot();
+      return;
+    }
+    //let direction = this.backWallHitted ? 'forward' : 'backward';
+    this.strategy('forward', warrior);
   }
 
 }
