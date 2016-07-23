@@ -1,5 +1,6 @@
 class Player {
   constructor() {
+      this.direction = false;
       this.maxLife = 20;
       this.pastHealth = this.maxLife;
       this.backWallHitted = false;
@@ -13,22 +14,16 @@ class Player {
         hasEnemy: hasEnemy
     };
   }
-  strategy(direction, warrior){
-    let space = warrior.feel(direction);
+  strategy(warrior){
+    let space = warrior.feel();
     let room = this.mapRoom(warrior.look());
     let health = warrior.health();
-
-    if (direction === 'backward' && space.isWall()) {
-      this.backWallHitted = true;
-      warrior.walk();
-      return;
-    }
 
     if(room.hasEnemy()){
       warrior.shoot();
       //warrior.attack(direction);
     } else if(space.isCaptive()){
-      warrior.rescue(direction);
+      warrior.rescue();
     }
     else if (space.isEmpty()) {
       if (health <= this.maxLife/2 && this.pastHealth > health) {
@@ -36,21 +31,24 @@ class Player {
       } else if(health < this.maxLife && health >= this.pastHealth){
         warrior.rest();
       } else {
-        warrior.walk(direction);
+        warrior.walk();
       }
     }
     this.pastHealth = health;
   }
   playTurn(warrior) {
+    if(!this.direction){
+        this.direction = 'backward';
+        warrior.pivot();
+        return;
+    }
     let space = warrior.feel();
-    //console.log(captive.isEmpty(),w1.isCaptive(),w2.isEnemy());
-
-    if (!space.isWall()) {
+    if (this.direction === 'backward' && space.isWall()) {
+      this.direction = 'forward';
       warrior.pivot();
       return;
     }
-    //let direction = this.backWallHitted ? 'forward' : 'backward';
-    this.strategy('forward', warrior);
+    this.strategy(warrior);
   }
 
 }
