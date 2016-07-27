@@ -3,7 +3,6 @@ class Player {
     this.maxHealth = 20;
   }
   getSurrounding(warrior){
-
     let surroundings = {
         right : warrior.feel('right'),
         left : warrior.feel('left'),
@@ -27,10 +26,10 @@ class Player {
       get
     };
   }
-  playTurn(warrior) {
-    let surround = this.getSurrounding(warrior);
-    let towardsStairs = warrior.directionOfStairs();
+
+  strategy(warrior, mainDir){
     let health = warrior.health();
+    let surround = this.getSurrounding(warrior);
     let enemies = surround.getAll('isEnemy');
     let captives = surround.getAll('isCaptive');
 
@@ -49,11 +48,16 @@ class Player {
           let captive = captives[0];
           warrior.rescue(captive);
         } else {
-          if(surround.get('isEmpty',towardsStairs)){
-            warrior.walk(towardsStairs);
+          if(surround.get('isEmpty',mainDir)){
+            warrior.walk(mainDir);
           }
         }
       }
     }
+  }
+
+  playTurn(warrior) {
+    let target = warrior.listen().length ?  warrior.directionOf(warrior.listen()[0]) : warrior.directionOfStairs();
+    this.strategy(warrior, target);
   }
 }
